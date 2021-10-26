@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class Room {
     private String roomID;
-    private int roomPrice;
+    private double roomPrice;
     private Customer customer;
     private RoomType roomType;
     private RoomStatus roomStatus;

@@ -1,8 +1,6 @@
 package controller;
 
-import model.Room;
-import model.RoomStatus;
-import model.RoomType;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +8,7 @@ import java.util.stream.Collectors;
 
 public class BookingController {
     private ArrayList<Room> roomList = new ArrayList<>();
+    private ArrayList<BookingDetail> bookingDetails = new ArrayList<>();
 
     public BookingController() {
 
@@ -50,6 +49,62 @@ public class BookingController {
         rooms.forEach(room -> {
             System.out.println(room);
         });
+    }
+
+    public void booking(String customerName, String customerTelNo, String roomID, int numberOfPeople, int extendBed, String breakfastPackage) {
+        Customer customer = new Customer(customerName, customerTelNo);
+        boolean isHavePackage = false;
+        if (breakfastPackage == "Y") {
+            isHavePackage = true;
+        }
+
+        if (breakfastPackage == "N") {
+            isHavePackage = false;
+        }
+        for (int i = 0; i < roomList.size(); i++) {
+            Room room = roomList.get(i);
+            if (room.getRoomID().equals(roomID) && room.getRoomStatus().equals(RoomStatus.AVAILABLE)) {
+                room.setCustomer(customer);
+                room.setRoomStatus(RoomStatus.NOT_AVAILABLE);
+                OptionOfRoom optionOfRoom = new OptionOfRoom(extendBed, isHavePackage);
+//                calBookingPrice(room, numberOfPeople, extendBed, isHavePackage);
+                System.out.println("The Price is : " + calBookingPrice(room, numberOfPeople, extendBed, isHavePackage));
+                bookingDetails.add(new BookingDetail(
+                        room,
+                        optionOfRoom,
+                        "PENDING",
+                        numberOfPeople));
+                bookingDetails.stream().filter(item -> item.getRoom().equals(room));
+                break;
+            }
+        }
+
+        System.out.println("Booking Complete");
+    }
+
+    public void showBookingDetails() {
+        bookingDetails.forEach(item -> {
+            System.out.println(item);
+        });
+    }
+
+    public double calBookingPrice(Room room, int numberOfPeople, int extendBed, boolean breakfastPackage) {
+        double price = 0;
+        double bedPrice = 0;
+        double breakfastPrice = 0;
+        price += room.getRoomPrice();
+
+        if (extendBed != 0) {
+            bedPrice = 1500 * extendBed;
+        }
+        price += bedPrice;
+
+        if (numberOfPeople != 0 && breakfastPackage) {
+            breakfastPrice = 2500 * numberOfPeople;
+        }
+
+        price += breakfastPrice;
+        return price;
     }
 
 
