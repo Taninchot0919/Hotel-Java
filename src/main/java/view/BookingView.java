@@ -29,6 +29,9 @@ public class BookingView {
                     booking();
                     break;
                 case 5:
+                    checkout();
+                    break;
+                case 6:
                     bookingController.showBookingDetails();
                     break;
                 case 0:
@@ -45,7 +48,8 @@ public class BookingView {
         System.out.println("2. Show By room types");
         System.out.println("3. Show Room Available");
         System.out.println("4. Booking");
-        System.out.println("5. Show Booking Details");
+        System.out.println("5. Checkout");
+        System.out.println("6. Show Booking Details");
         System.out.println("0. Exit Program");
         System.out.print("You selected : ");
     }
@@ -89,6 +93,13 @@ public class BookingView {
         System.out.print("Selected Room : ");
         String roomID = sc.nextLine();
 
+        int availableRoomIndex = bookingController.findByRoomIDAndCanBooking(roomID);
+
+        if (availableRoomIndex == -1) {
+            System.out.println("Can't Find Room ID or RoomStatus Not Available!");
+            return;
+        }
+
         System.out.print("Number of people : ");
         Scanner sc2 = new Scanner(System.in);
         int numberOfPeople = sc2.nextInt();
@@ -98,7 +109,16 @@ public class BookingView {
 
         System.out.print("Breakfast Package [Y:N] : ");
         String breakfastPackage = sc.nextLine();
-        bookingController.booking(name, telNo, roomID, numberOfPeople, extendBed, breakfastPackage);
+        bookingController.booking(name, telNo, availableRoomIndex, numberOfPeople, extendBed, breakfastPackage);
+    }
+
+    private void checkout() {
+        Scanner sc = new Scanner(System.in);
+        bookingController.showBookingDetails();
+        System.out.print("Selected checkout room : ");
+        String selectedRoom = sc.nextLine();
+
+        bookingController.checkout(selectedRoom);
     }
 
 }

@@ -27,4 +27,21 @@ public class Room {
             roomPrice = 5200;
         }
     }
+
+    public Room(String roomId, RoomType roomType, Customer customer) {
+        this.roomID = roomId;
+        this.roomType = roomType;
+        this.customer = customer;
+        roomStatus = RoomStatus.NOT_AVAILABLE;
+
+        if (roomType.equals(RoomType.STANDARD)) {
+            roomPrice = 1500;
+        }
+        if (roomType.equals(RoomType.SUPERIOR)) {
+            roomPrice = 2900;
+        }
+        if (roomType.equals(RoomType.DELUXE)) {
+            roomPrice = 5200;
+        }
+    }
 }

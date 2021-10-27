@@ -14,11 +14,11 @@ public class BookingController {
 
         roomList.add(new Room("STD001", RoomType.STANDARD));
         roomList.add(new Room("STD002", RoomType.STANDARD));
-        roomList.add(new Room("STD003", RoomType.STANDARD));
+        roomList.add(new Room("STD003", RoomType.STANDARD, new Customer("Taninchot", "095")));
         roomList.add(new Room("STD004", RoomType.STANDARD));
         roomList.add(new Room("STD005", RoomType.STANDARD));
 
-        roomList.add(new Room("SUP001", RoomType.SUPERIOR));
+        roomList.add(new Room("SUP001", RoomType.SUPERIOR, new Customer("Art", "098")));
         roomList.add(new Room("SUP002", RoomType.SUPERIOR));
         roomList.add(new Room("SUP003", RoomType.SUPERIOR));
         roomList.add(new Room("SUP004", RoomType.SUPERIOR));
@@ -27,14 +27,32 @@ public class BookingController {
         roomList.add(new Room("DEL001", RoomType.DELUXE));
         roomList.add(new Room("DEL002", RoomType.DELUXE));
         roomList.add(new Room("DEL003", RoomType.DELUXE));
-        roomList.add(new Room("DEL004", RoomType.DELUXE));
+        roomList.add(new Room("DEL004", RoomType.DELUXE, new Customer("4rTTh0", "095")));
         roomList.add(new Room("DEL005", RoomType.DELUXE));
+
+        bookingDetails.add(new BookingDetail(roomList.get(2), new OptionOfRoom(3, true), "PENDING", 3));
+        bookingDetails.add(new BookingDetail(roomList.get(5), new OptionOfRoom(3, true), "PENDING", 3));
+        bookingDetails.add(new BookingDetail(roomList.get(13), new OptionOfRoom(2, false), "PENDING", 5));
     }
 
     public void showAllRoom() {
         for (Room room : roomList) {
             System.out.println(room);
         }
+    }
+
+    public void checkout(String roomID) {
+        int indexOfBooking = findBookingDetailByRoomID(roomID, true);
+        if (indexOfBooking == -1) {
+            System.out.println("Can't Checkout cannot find roomID or Room doesn't booking");
+            return;
+        }
+        Room room = bookingDetails.get(indexOfBooking).getRoom();
+        room.setRoomStatus(RoomStatus.AVAILABLE);
+        room.setCustomer(null);
+        bookingDetails.remove(indexOfBooking);
+        System.out.println("Checkout Successfully");
+
     }
 
     public void showRoomType(RoomType roomType) {
@@ -51,35 +69,28 @@ public class BookingController {
         });
     }
 
-    public void booking(String customerName, String customerTelNo, String roomID, int numberOfPeople, int extendBed, String breakfastPackage) {
+    public void booking(String customerName, String customerTelNo, int roomIndex, int numberOfPeople, int extendBed, String breakfastPackage) {
         Customer customer = new Customer(customerName, customerTelNo);
         boolean isHavePackage = false;
-        if (breakfastPackage == "Y") {
+        if (breakfastPackage.equals("Y")) {
             isHavePackage = true;
         }
 
-        if (breakfastPackage == "N") {
+        if (breakfastPackage.equals("N")) {
             isHavePackage = false;
         }
-        for (int i = 0; i < roomList.size(); i++) {
-            Room room = roomList.get(i);
-            if (room.getRoomID().equals(roomID) && room.getRoomStatus().equals(RoomStatus.AVAILABLE)) {
-                room.setCustomer(customer);
-                room.setRoomStatus(RoomStatus.NOT_AVAILABLE);
-                OptionOfRoom optionOfRoom = new OptionOfRoom(extendBed, isHavePackage);
-//                calBookingPrice(room, numberOfPeople, extendBed, isHavePackage);
-                System.out.println("The Price is : " + calBookingPrice(room, numberOfPeople, extendBed, isHavePackage));
-                bookingDetails.add(new BookingDetail(
-                        room,
-                        optionOfRoom,
-                        "PENDING",
-                        numberOfPeople));
-                bookingDetails.stream().filter(item -> item.getRoom().equals(room));
-                break;
-            }
-        }
-
-        System.out.println("Booking Complete");
+        Room room = roomList.get(roomIndex);
+        room.setCustomer(customer);
+        room.setRoomStatus(RoomStatus.NOT_AVAILABLE);
+        OptionOfRoom optionOfRoom = new OptionOfRoom(extendBed, isHavePackage);
+        System.out.println("The Price is : " + calBookingPrice(room, numberOfPeople, extendBed, isHavePackage));
+        bookingDetails.add(new BookingDetail(
+                room,
+                optionOfRoom,
+                "PENDING",
+                numberOfPeople));
+        bookingDetails.stream().filter(item -> item.getRoom().equals(room));
+        return;
     }
 
     public void showBookingDetails() {
@@ -107,5 +118,35 @@ public class BookingController {
         return price;
     }
 
+    public int findByRoomIDAndCanBooking(String roomID) {
+        for (int i = 0; i < roomList.size(); i++) {
+            Room room = roomList.get(i);
+            if (room.getRoomID().equals(roomID) && room.getRoomStatus().equals(RoomStatus.AVAILABLE)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int findBookingDetailByRoomID(String roomID, boolean isCheckout) {
+        if (isCheckout == false) {
+            for (int i = 0; i < bookingDetails.size(); i++) {
+                BookingDetail detailOfBooking = bookingDetails.get(i);
+                if (detailOfBooking.getRoom().getRoomID().equals(roomID)) {
+                    return i;
+                }
+            }
+        }
+        if (isCheckout == true) {
+            for (int i = 0; i < bookingDetails.size(); i++) {
+                BookingDetail detailOfBooking = bookingDetails.get(i);
+                if (detailOfBooking.getRoom().getRoomID().equals(roomID) && detailOfBooking.getRoom().getRoomStatus().equals(RoomStatus.NOT_AVAILABLE)) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
 
 }
